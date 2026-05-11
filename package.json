@@ -1,0 +1,11 @@
+{
+  "name": "signaltrace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Public social presence intelligence dashboard.",
+  "scripts": {
+    "dev": "python3 -m http.server 4173",
+    "start": "python3 -m http.server 4173",
+    "build": "mkdir -p dist && cp index.html styles.css app.js README.md dist/"
+  }
+}

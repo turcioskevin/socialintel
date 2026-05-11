@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SignalTrace</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Workspace">
+        <div class="brand">
+          <div class="mark" aria-hidden="true">ST</div>
+          <div>
+            <strong>SignalTrace</strong>
+            <span>Public social intelligence</span>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="Primary">
+          <button class="nav-item active" type="button" data-view="search">Search</button>
+          <button class="nav-item" type="button" data-view="timeline">Timeline</button>
+          <button class="nav-item" type="button" data-view="profiles">Profiles</button>
+          <button class="nav-item" type="button" data-view="sources">Sources</button>
+        </nav>
+
+        <section class="source-health" aria-label="Source health">
+          <div class="section-title">Live Sources</div>
+          <ul id="sourceList"></ul>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <form id="searchForm" class="search-panel">
+            <label for="searchInput">Person, username, or handle</label>
+            <div class="search-row">
+              <input id="searchInput" name="query" type="search" placeholder="try octocat, gaearon, sindresorhus" autocomplete="off" required />
+              <button class="primary-button" type="submit">Run search</button>
+            </div>
+            <div class="search-options" aria-label="Search options">
+              <label><input type="checkbox" name="github" checked /> GitHub</label>
+              <label><input type="checkbox" name="reddit" checked /> Reddit</label>
+              <label><input type="checkbox" name="hn" checked /> Hacker News</label>
+              <label><input type="checkbox" name="sample" checked /> Sample social graph</label>
+            </div>
+          </form>
+          <div class="compliance-note">
+            <strong>Public-data mode</strong>
+            <span>Only public profile and activity endpoints are queried. Private, deleted, or authenticated activity stays out of scope.</span>
+          </div>
+        </header>
+
+        <section class="summary-grid" aria-label="Search summary">
+          <article class="metric">
+            <span>Profiles</span>
+            <strong id="profileCount">0</strong>
+          </article>
+          <article class="metric">
+            <span>Activity Items</span>
+            <strong id="activityCount">0</strong>
+          </article>
+          <article class="metric">
+            <span>Sources</span>
+            <strong id="sourceCount">0</strong>
+          </article>
+          <article class="metric">
+            <span>Latest Activity</span>
+            <strong id="latestActivity">-</strong>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <section class="results-panel" aria-label="Activity timeline">
+            <div class="panel-heading">
+              <div>
+                <span class="section-title">Unified Timeline</span>
+                <h1 id="resultTitle">Search a public identity</h1>
+              </div>
+              <div class="filters">
+                <select id="platformFilter" aria-label="Filter by platform">
+                  <option value="all">All platforms</option>
+                </select>
+                <select id="typeFilter" aria-label="Filter by activity type">
+                  <option value="all">All activity</option>
+                  <option value="post">Posts</option>
+                  <option value="comment">Comments</option>
+                  <option value="repo">Repositories</option>
+                  <option value="event">Events</option>
+                  <option value="profile">Profiles</option>
+                </select>
+              </div>
+            </div>
+            <div id="status" class="status">Ready to search public activity.</div>
+            <div id="timeline" class="timeline" aria-live="polite"></div>
+          </section>
+
+          <aside class="inspector" aria-label="Profile inspector">
+            <section class="inspector-section">
+              <div class="section-title">Candidate Profiles</div>
+              <div id="profiles" class="profile-list"></div>
+            </section>
+
+            <section class="inspector-section">
+              <div class="section-title">Topics</div>
+              <div id="topics" class="topic-list"></div>
+            </section>
+
+            <section class="inspector-section">
+              <div class="section-title">Export</div>
+              <button id="exportButton" class="secondary-button" type="button">Download JSON</button>
+            </section>
+          </aside>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
