@@ -14,6 +14,7 @@ SignalTrace should treat major consumer platforms as backend connectors with exp
 - Useful data: public Page metadata and permitted Page feed content.
 - Limits: personal profile activity is not a general public API surface.
 - Current connector: `POST /api/search` accepts `facebook` as a source and reads exact public Page handles, Page IDs, or Page URLs when `FACEBOOK_ACCESS_TOKEN` is set.
+- Required access: `Page Public Metadata Access` for public Page details, `Page Public Content Access` for public Page posts, or `pages_read_engagement` with a Page access token for Pages you manage.
 
 ## TikTok
 

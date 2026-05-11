@@ -311,7 +311,26 @@ const searchFacebookPage = async (query) => {
     fields,
     access_token: accessToken
   });
-  const page = await fetchFacebookJson(`https://graph.facebook.com/${version}/${encodeURIComponent(pageIdentifier)}?${params}`);
+  const page = await fetchFacebookJson(`https://graph.facebook.com/${version}/${encodeURIComponent(pageIdentifier)}?${params}`).catch((error) => {
+    if (isFacebookPermissionError(error)) {
+      return {
+        __permissionError: true,
+        message: error.message
+      };
+    }
+    throw error;
+  });
+
+  if (page?.__permissionError) {
+    return placeholderSocialResult(query, {
+      platform: "Facebook",
+      url: `https://www.facebook.com/${encodeURIComponent(pageIdentifier)}`,
+      details: "Your Meta token is valid enough to call Graph API, but it is missing Page access.",
+      title: "Facebook Page permissions required",
+      body: "Request Page Public Metadata Access for Page details and Page Public Content Access for public Page posts. For Pages you manage, pages_read_engagement may also work with the right Page access token.",
+      tags: ["meta-review", "page-public-content-access", "pages-read-engagement"]
+    });
+  }
 
   if (!page?.id) {
     return placeholderSocialResult(query, {
@@ -357,10 +376,22 @@ const fetchFacebookJson = async (url) => {
 
   if (!response.ok) {
     const message = payload?.error?.message || `Facebook API request failed with ${response.status}`;
-    throw new Error(message);
+    const error = new Error(message);
+    error.facebook = payload?.error;
+    throw error;
   }
 
   return payload;
+};
+
+const isFacebookPermissionError = (error) => {
+  const message = String(error?.message || "").toLowerCase();
+  return error?.facebook?.code === 100 && (
+    message.includes("missing permission") ||
+    message.includes("pages_read_engagement") ||
+    message.includes("page public content access") ||
+    message.includes("page public metadata access")
+  );
 };
 
 const cleanFacebookPageIdentifier = (value) => {

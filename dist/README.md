@@ -68,6 +68,14 @@ nasa
 facebook.com/nasa
 ```
 
+If Meta returns a `(#100)` permission error, the token is missing one of the required Page access paths:
+
+- `Page Public Metadata Access` for public Page metadata.
+- `Page Public Content Access` for public Page posts.
+- `pages_read_engagement` with a Page access token for Pages you manage.
+
+This is configured in the Meta Developer Dashboard under app review / feature access. A basic user token usually is not enough for arbitrary public Page activity.
+
 ## Deploy
 
 ### Vercel
