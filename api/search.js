@@ -144,14 +144,7 @@ const providerMap = {
   facebook: {
     label: "Facebook",
     async search(query) {
-      return placeholderSocialResult(query, {
-        platform: "Facebook",
-        url: `https://www.facebook.com/search/top?q=${encodeURIComponent(query)}`,
-        details: "Official Graph API access is strongest for Pages, not personal profiles.",
-        title: "Facebook public Page activity connector",
-        body: "Next step: add Meta Graph API Page lookup, Page feed reads where permitted, and Meta Content Library access if eligible.",
-        tags: ["meta", "pages", "content-library"]
-      });
+      return searchFacebookPage(query);
     }
   },
   snapchat: {
@@ -284,6 +277,107 @@ const setCorsHeaders = (response) => {
   response.setHeader("Access-Control-Allow-Origin", "*");
   response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+};
+
+const searchFacebookPage = async (query) => {
+  const accessToken = process.env.FACEBOOK_ACCESS_TOKEN;
+  const pageIdentifier = cleanFacebookPageIdentifier(query);
+
+  if (!accessToken) {
+    return placeholderSocialResult(query, {
+      platform: "Facebook",
+      url: `https://www.facebook.com/${encodeURIComponent(pageIdentifier)}`,
+      details: "Set FACEBOOK_ACCESS_TOKEN in Vercel to fetch Page metadata and posts.",
+      title: "Facebook connector needs a Meta access token",
+      body: "This connector is wired for public Facebook Pages. Add a Meta Graph API token in Vercel, then search by Page handle, Page ID, or Page URL.",
+      tags: ["env-required", "meta", "pages"]
+    });
+  }
+
+  const version = process.env.FACEBOOK_GRAPH_VERSION || "v25.0";
+  const fields = [
+    "id",
+    "name",
+    "username",
+    "link",
+    "category",
+    "fan_count",
+    "verification_status",
+    "picture.type(large)",
+    "about",
+    "posts.limit(25){id,message,story,created_time,permalink_url,full_picture,shares,comments.summary(true),likes.summary(true)}"
+  ].join(",");
+  const params = new URLSearchParams({
+    fields,
+    access_token: accessToken
+  });
+  const page = await fetchFacebookJson(`https://graph.facebook.com/${version}/${encodeURIComponent(pageIdentifier)}?${params}`);
+
+  if (!page?.id) {
+    return placeholderSocialResult(query, {
+      platform: "Facebook",
+      url: `https://www.facebook.com/${encodeURIComponent(pageIdentifier)}`,
+      details: "No Facebook Page data returned for this handle or ID.",
+      title: "Facebook Page not found or not accessible",
+      body: "Try an exact public Page handle or Page URL. Personal profiles and many restricted Pages are not available through this connector.",
+      tags: ["not-found", "pages", "exact-handle"]
+    });
+  }
+
+  return {
+    profiles: [{
+      platform: "Facebook",
+      handle: page.username || page.id,
+      displayName: page.name || pageIdentifier,
+      avatar: page.picture?.data?.url || "",
+      url: page.link || `https://www.facebook.com/${page.id}`,
+      confidence: exactConfidence(query, page.username || page.name || pageIdentifier),
+      details: [
+        page.category,
+        typeof page.fan_count === "number" ? `${page.fan_count.toLocaleString("en-US")} followers` : "",
+        page.verification_status ? `${page.verification_status} verification` : ""
+      ].filter(Boolean).join(" - ") || "Facebook Page"
+    }],
+    activities: (page.posts?.data || []).map((post) => ({
+      platform: "Facebook",
+      type: post.full_picture ? "post" : "comment",
+      title: post.story || page.name || "Facebook Page post",
+      body: post.message || post.story || "Public Facebook Page activity.",
+      url: post.permalink_url || `https://www.facebook.com/${post.id}`,
+      date: post.created_time,
+      engagement: facebookEngagement(post),
+      tags: ["facebook-page", post.full_picture ? "media" : "status"].filter(Boolean)
+    }))
+  };
+};
+
+const fetchFacebookJson = async (url) => {
+  const response = await fetch(url);
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message = payload?.error?.message || `Facebook API request failed with ${response.status}`;
+    throw new Error(message);
+  }
+
+  return payload;
+};
+
+const cleanFacebookPageIdentifier = (value) => {
+  const input = String(value || "").trim();
+  const withoutProtocol = input.replace(/^https?:\/\//i, "").replace(/^www\./i, "");
+  if (withoutProtocol.toLowerCase().startsWith("facebook.com/")) {
+    const path = withoutProtocol.slice("facebook.com/".length).split(/[/?#]/)[0];
+    return path || cleanHandle(input);
+  }
+  return cleanHandle(input);
+};
+
+const facebookEngagement = (post) => {
+  const shares = post.shares?.count || 0;
+  const comments = post.comments?.summary?.total_count || 0;
+  const likes = post.likes?.summary?.total_count || 0;
+  return shares + comments + likes;
 };
 
 const fetchJson = async (url) => {

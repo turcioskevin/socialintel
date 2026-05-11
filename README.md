@@ -45,6 +45,29 @@ The frontend calls `POST /api/search` on Vercel:
 
 The endpoint returns normalized `profiles`, `activities`, and source-level `failures`.
 
+### Facebook Setup
+
+The Facebook connector supports public Facebook Pages through Meta Graph API. It does not support ordinary personal profile history.
+
+Add this Vercel environment variable:
+
+```text
+FACEBOOK_ACCESS_TOKEN=your_meta_graph_api_token
+```
+
+Optional:
+
+```text
+FACEBOOK_GRAPH_VERSION=v25.0
+```
+
+Then search by exact Page handle, Page ID, or Page URL, for example:
+
+```text
+nasa
+facebook.com/nasa
+```
+
 ## Deploy
 
 ### Vercel

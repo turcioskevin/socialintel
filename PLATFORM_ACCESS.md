@@ -13,6 +13,7 @@ SignalTrace should treat major consumer platforms as backend connectors with exp
 - Best official path: Meta Graph API for Pages and, where eligible, Meta Content Library/API.
 - Useful data: public Page metadata and permitted Page feed content.
 - Limits: personal profile activity is not a general public API surface.
+- Current connector: `POST /api/search` accepts `facebook` as a source and reads exact public Page handles, Page IDs, or Page URLs when `FACEBOOK_ACCESS_TOKEN` is set.
 
 ## TikTok
 
