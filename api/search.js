@@ -115,6 +115,58 @@ const providerMap = {
       };
     }
   },
+  instagram: {
+    label: "Instagram",
+    async search(query) {
+      return placeholderSocialResult(query, {
+        platform: "Instagram",
+        url: `https://www.instagram.com/${encodeURIComponent(cleanHandle(query))}/`,
+        details: "Official APIs focus on Business/Creator accounts and approved Meta access.",
+        title: "Instagram public profile and media connector",
+        body: "Next step: connect Meta's Instagram APIs for professional accounts, hashtag discovery, business discovery, and permitted public media fields.",
+        tags: ["meta", "business-creator", "api-review"]
+      });
+    }
+  },
+  tiktok: {
+    label: "TikTok",
+    async search(query) {
+      return placeholderSocialResult(query, {
+        platform: "TikTok",
+        url: `https://www.tiktok.com/@${encodeURIComponent(cleanHandle(query))}`,
+        details: "Public research-grade access generally requires TikTok Research API approval.",
+        title: "TikTok public videos, comments, and account data connector",
+        body: "Next step: apply for TikTok Research API access or use an approved data provider for public creator/video discovery.",
+        tags: ["research-api", "approval-required", "video"]
+      });
+    }
+  },
+  facebook: {
+    label: "Facebook",
+    async search(query) {
+      return placeholderSocialResult(query, {
+        platform: "Facebook",
+        url: `https://www.facebook.com/search/top?q=${encodeURIComponent(query)}`,
+        details: "Official Graph API access is strongest for Pages, not personal profiles.",
+        title: "Facebook public Page activity connector",
+        body: "Next step: add Meta Graph API Page lookup, Page feed reads where permitted, and Meta Content Library access if eligible.",
+        tags: ["meta", "pages", "content-library"]
+      });
+    }
+  },
+  snapchat: {
+    label: "Snapchat",
+    async search(query) {
+      return placeholderSocialResult(query, {
+        platform: "Snapchat",
+        url: `https://www.snapchat.com/add/${encodeURIComponent(cleanHandle(query))}`,
+        details: "Snap Public Profile API is allowlist-based.",
+        title: "Snapchat Public Profile connector",
+        body: "Next step: request Snap Public Profile API access for creator discovery, profile metadata, public Spotlight, and Saved Story metrics.",
+        tags: ["allowlist", "public-profile", "spotlight"]
+      });
+    }
+  },
   sample: {
     label: "Sample social graph",
     async search(query) {
@@ -245,6 +297,30 @@ const fetchJson = async (url) => {
 };
 
 const emptyResult = () => ({ profiles: [], activities: [] });
+const placeholderSocialResult = (query, config) => {
+  const handle = cleanHandle(query);
+  return {
+    profiles: [{
+      platform: config.platform,
+      handle,
+      displayName: query,
+      avatar: "",
+      url: config.url,
+      confidence: 55,
+      details: config.details
+    }],
+    activities: [{
+      platform: config.platform,
+      type: "profile",
+      title: config.title,
+      body: config.body,
+      url: config.url,
+      date: new Date().toISOString(),
+      engagement: 0,
+      tags: config.tags
+    }]
+  };
+};
 const cleanHandle = (value) => value.trim().replace(/^@/, "").replace(/^u\//i, "").split(/\s+/)[0];
 const exactConfidence = (query, handle) => cleanHandle(query).toLowerCase() === String(handle).toLowerCase() ? 96 : 62;
 const formatDate = (value) => value ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value)) : "-";

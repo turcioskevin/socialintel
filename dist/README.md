@@ -6,7 +6,7 @@ SignalTrace is a public social presence intelligence dashboard. It searches publ
 
 - Static browser app with a Vercel serverless search API.
 - Live public lookups for GitHub, Reddit public user overview, and Hacker News through `/api/search`.
-- Sample connector slots for X / Twitter and YouTube to show how API-backed sources will appear.
+- Connector slots for Instagram, TikTok, Facebook, Snapchat, X / Twitter, and YouTube to show how API-backed sources will appear.
 - Unified activity model with platform, type, title, body, source URL, timestamp, engagement, and tags.
 - Candidate profile list with match confidence.
 - Timeline filters, topic extraction, and JSON export.
@@ -88,3 +88,5 @@ Good first backend tables:
 - `source_runs`: provider, status, error, rate-limit metadata, started/finished timestamps.
 
 Private accounts, deleted content, direct messages, hidden likes/follows, and authenticated-only activity should remain out of scope unless the account owner explicitly authorizes access through the platform.
+
+See `PLATFORM_ACCESS.md` for the major-platform connector plan.
